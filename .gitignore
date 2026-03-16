@@ -1,0 +1,41 @@
+# Python virtual environment — never commit this
+venv/
+env/
+ENV/
+
+# Python bytecode — generated automatically, not source code
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment variables — contains secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite database — this is generated data, not source code
+*.db
+*.sqlite
+*.sqlite3
+
+# VS Code settings — personal editor preferences
+.vscode/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# MyPy type checker cache
+.mypy_cache/
