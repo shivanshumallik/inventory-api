@@ -2,6 +2,10 @@
 
 from fastapi import FastAPI
 from app.routers import items
+from app.core.database import engine
+from app.models import item as item_model
+
+item_model.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Inventory & Asset Management API",
