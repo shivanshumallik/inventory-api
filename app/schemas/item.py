@@ -6,10 +6,9 @@ from datetime import datetime
 
 
 class ItemBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100, description="Name of the item")
+    name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    quantity: int = Field(default=0, ge=0, description="Must be 0 or greater")
-    price: float = Field(..., gt=0, description="Must be greater than 0")
+    price: float = Field(..., gt=0)
     category: Optional[str] = Field(None, max_length=50)
 
 
@@ -20,7 +19,6 @@ class ItemCreate(ItemBase):
 class ItemUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    quantity: Optional[int] = Field(None, ge=0)
     price: Optional[float] = Field(None, gt=0)
     category: Optional[str] = Field(None, max_length=50)
     is_active: Optional[bool] = None
