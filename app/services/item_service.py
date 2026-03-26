@@ -6,23 +6,49 @@ from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemUpdate
 
 
-def get_all_items(db: Session, skip: int = 0, limit: int = 100) -> list[Item]:
+def get_all_items(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    category: str | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    search: str | None = None,
+) -> list[Item]:
     """
-    Retrieve all active items from the database.
-    skip and limit enable pagination — don't return 10,000 rows at once.
+    Get all active items with optional filtering and search.
+    Every filter is optional — only applied if the user provides it.
     """
-    return db.query(Item).filter(Item.is_active == True).offset(skip).limit(limit).all()
+    
+    query = db.query(Item).filter(Item.is_active == True)
+
+    
+    if category:
+        query = query.filter(Item.category == category)
+
+    
+    if min_price is not None:
+        query = query.filter(Item.price >= min_price)
+
+    
+    if max_price is not None:
+        query = query.filter(Item.price <= max_price)
+
+    
+    if search:
+        query = query.filter(Item.name.ilike(f"%{search}%"))
+
+    
+    return query.offset(skip).limit(limit).all()
 
 
 def get_item_by_id(db: Session, item_id: int) -> Item:
-    """
-    Retrieve a single item by its ID.
-    Raises a 404 error if the item doesn't exist or is inactive.
-    """
-    item = db.query(Item).filter(Item.id == item_id, Item.is_active == True).first()
+    """Get a single item or raise 404"""
+    item = db.query(Item).filter(
+        Item.id == item_id,
+        Item.is_active == True
+    ).first()
 
-    # If no item found, raise an HTTP 404 error.
-    # FastAPI catches HTTPException and returns it as a proper JSON error response.
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -32,51 +58,28 @@ def get_item_by_id(db: Session, item_id: int) -> Item:
 
 
 def create_item(db: Session, item_data: ItemCreate) -> Item:
-    """
-    Create a new item in the database.
-    """
-    # Convert the Pydantic schema into a SQLAlchemy model instance.
-    # model_dump() turns the Pydantic object into a plain dictionary.
-    # **dict unpacks it as keyword arguments to Item().
+    """Create a new item"""
     db_item = Item(**item_data.model_dump())
-
-    db.add(db_item)       # Stage the new item (not saved yet)
-    db.commit()           # Actually write to the database
-    db.refresh(db_item)   # Reload from DB to get generated fields (id, created_at)
-
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
     return db_item
 
 
 def update_item(db: Session, item_id: int, item_data: ItemUpdate) -> Item:
-    """
-    Update an existing item.
-    Only updates fields that were actually provided (partial update).
-    """
-    # First, verify the item exists
+    """Update only the fields that were provided"""
     db_item = get_item_by_id(db, item_id)
-
-    # model_dump(exclude_unset=True) only returns fields the user actually sent.
-    # If they only sent {"quantity": 5}, we only update quantity.
-    # Without exclude_unset=True, all optional fields would be None
-    # and would overwrite existing data!
     update_data = item_data.model_dump(exclude_unset=True)
-
     for field, value in update_data.items():
-        setattr(db_item, field, value)  # dynamically set each field
-
+        setattr(db_item, field, value)
     db.commit()
     db.refresh(db_item)
     return db_item
 
 
 def delete_item(db: Session, item_id: int) -> dict:
-    """
-    Soft delete an item by setting is_active to False.
-    We never actually remove the row from the database.
-    """
+    """Soft delete an item"""
     db_item = get_item_by_id(db, item_id)
-
-    db_item.is_active = False  # Soft delete
+    db_item.is_active = False
     db.commit()
-
     return {"message": f"Item '{db_item.name}' has been deactivated successfully"}
