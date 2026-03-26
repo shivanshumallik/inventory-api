@@ -11,35 +11,32 @@ class Inventory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    
     item_id = Column(
         Integer,
         ForeignKey("items.id", ondelete="CASCADE"),
         nullable=False
     )
 
-    
     warehouse_id = Column(
         Integer,
         ForeignKey("warehouses.id", ondelete="CASCADE"),
         nullable=False
     )
 
-    
     quantity = Column(Integer, default=0, nullable=False)
 
     
+    threshold = Column(Integer, default=10, nullable=True)
+
     last_updated = Column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now()
     )
 
-    
     __table_args__ = (
         UniqueConstraint("item_id", "warehouse_id", name="unique_item_warehouse"),
     )
 
-    
     item = relationship("Item", back_populates="inventory_entries")
     warehouse = relationship("Warehouse", back_populates="inventory_entries")

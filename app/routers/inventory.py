@@ -9,7 +9,8 @@ from app.schemas.inventory import (
     InventoryCreate,
     InventoryResponse,
     StockAdjustment,
-    StockSummaryResponse
+    StockSummaryResponse,
+    LowStockAlertResponse
 )
 from app.services import inventory_service
 
@@ -18,10 +19,7 @@ router = APIRouter()
 
 @router.post("/", response_model=InventoryResponse, status_code=status.HTTP_201_CREATED)
 def add_stock(inventory: InventoryCreate, db: Session = Depends(get_db)):
-    """
-    Add stock for an item in a warehouse.
-    If stock entry already exists, quantity is added to existing.
-    """
+    """Add stock for an item in a warehouse"""
     return inventory_service.add_stock_to_warehouse(db, inventory)
 
 
@@ -34,6 +32,15 @@ def reduce_stock(
 ):
     """Reduce stock for an item in a specific warehouse"""
     return inventory_service.reduce_stock(db, item_id, warehouse_id, adjustment)
+
+
+@router.get("/low-stock/", response_model=List[LowStockAlertResponse])
+def get_low_stock_alerts(db: Session = Depends(get_db)):
+    """
+    Get all inventory entries where quantity is below threshold.
+    Use this endpoint to identify items that need restocking.
+    """
+    return inventory_service.get_low_stock_alerts(db)
 
 
 @router.get("/item/{item_id}", response_model=List[StockSummaryResponse])

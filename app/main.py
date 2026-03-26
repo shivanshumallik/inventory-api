@@ -2,12 +2,16 @@
 
 from fastapi import FastAPI
 from app.routers import items, warehouses, inventory
+from app.core.exceptions import register_exception_handlers
 
 app = FastAPI(
     title="Inventory & Asset Management API",
     description="A backend API for tracking inventory items and assets across warehouses.",
     version="0.3.0",
 )
+
+
+register_exception_handlers(app)
 
 app.include_router(items.router, prefix="/items", tags=["Items"])
 app.include_router(warehouses.router, prefix="/warehouses", tags=["Warehouses"])
