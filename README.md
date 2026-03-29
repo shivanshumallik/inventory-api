@@ -185,5 +185,5 @@ pytest tests/test_items.py::TestCreateItem::test_admin_can_create_item -v
 
 ## 👨‍💻 Author
 
-**Dibya** — Backend Developer
+**Shivanshu Raj** — Backend Developer
 - GitHub: [@shivanshumallik](https://github.com/shivanshumallik)
