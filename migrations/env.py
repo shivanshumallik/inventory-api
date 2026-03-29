@@ -17,6 +17,7 @@ from app.core.database import Base
 from app.models.item import Item
 from app.models.warehouse import Warehouse
 from app.models.inventory import Inventory
+from app.models.user import User
 
 
 config = context.config
